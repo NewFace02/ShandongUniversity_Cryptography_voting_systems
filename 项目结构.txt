@@ -1,0 +1,60 @@
+hello xsj!
+/voting-system
+│── /frontend                   # 前端界面（Vue.js）
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── Auth.vue        # 匿名认证组件
+│   │   │   ├── Vote.vue        # 投票组件
+│   │   │   └── Verify.vue      # 验证组件
+│   │   ├── services/
+│   │   │   ├── auth.js         # 认证服务
+│   │   │   ├── vote.js         # 投票服务
+│   │   │   └── verify.js       # 验证服务
+│   │   └── App.vue
+│   └── ...
+│
+│── /backend                    # Python后端
+│   ├── app.py                  # Flask主应用
+│   ├── config.py               # 配置（密钥、参数等）
+│   ├── requirements.txt        # 依赖
+│   ├── auth/
+│   │   ├── routes.py           # 认证路由
+│   │   ├── controller.py       # 认证控制（盲签名、权重证明）
+│   │   └── blind_signature.py  # 盲签名实现
+│   ├── vote/
+│   │   ├── routes.py
+│   │   ├── controller.py       # 投票处理
+│   │   └── weighted_encrypt.py # 加权加密
+│   ├── tally/
+│   │   ├── routes.py
+│   │   ├── controller.py       # 计票控制
+│   │   └── homomorphic.py      # 同态计票
+│   ├── verify/
+│   │   ├── routes.py
+│   │   └── controller.py       # 验证控制
+│   ├── storage/
+│   │   ├── vote_db.py          # 投票存储
+│   │   ├── merkle_tree.py      # Merkle树实现
+│   │   └── hash_chain.py       # 哈希链
+│   ├── crypto/
+│   │   ├── elgamal.py          # ElGamal加密
+│   │   ├── zkp.py              # 零知识证明
+│   │   ├── bulletproofs.py     # Bulletproofs实现
+│   │   └── chaum_pedersen.py   # Chaum-Pedersen证明
+│   ├── models/
+│   │   ├── vote.py             # 投票模型
+│   │   └── weight_proof.py     # 权重证明模型
+│   ├── audit/
+│   │   ├── logger.py           # 审计日志
+│   │   └── verifier.py         # 审计验证
+│   └── utils/
+│       ├── crypto_utils.py     # 加密工具
+│       └── merkle_utils.py     # Merkle工具
+│
+│── /tests                      # 测试
+│   ├── test_auth.py
+│   ├── test_vote.py
+│   ├── test_tally.py
+│   └── test_verify.py
+│
+└── README.md
