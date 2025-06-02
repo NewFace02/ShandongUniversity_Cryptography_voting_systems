@@ -1,4 +1,4 @@
-hello xsj!
+
 /voting-system
 │── /frontend                   # 前端界面（Vue.js）
 │   ├── src/
