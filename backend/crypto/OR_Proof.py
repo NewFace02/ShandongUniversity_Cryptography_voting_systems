@@ -4,6 +4,9 @@
 from ..utils import crypto_utils
 from typing import Tuple
 from dataclasses import dataclass
+from elgamal import PublicKey
+
+
 #零知识证明类，用于后面的vote结构体使用
 @dataclass
 class ZKProof_01:
@@ -17,10 +20,10 @@ class ZKProof_01:
 
 
 class ORProof:
-    def __init__(self, p, g, y):
-        self.p = p
-        self.g = g
-        self.y = y
+    def __init__(self,pk:PublicKey):
+        self.p = pk.p
+        self.g = pk.g
+        self.y = pk.y
     ##验证第一步，客户生成com1和com2
     def generate_proof_step1(self, m, c):
         self.w = crypto_utils.randint(0, self.p)

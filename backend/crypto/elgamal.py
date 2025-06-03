@@ -1,7 +1,23 @@
 "指数变体elgamal算法"
 
 from Crypto.Util import number
-from ..utils import mod_exp, inverse_mod
+from backend.utils.crypto_utils import mod_exp, inverse_mod
+from dataclasses import dataclass
+from typing import Tuple
+
+@dataclass
+class ElGamalCiphertext:
+    alpha: int
+    beta: int
+
+
+'可复用公钥结构'
+@dataclass
+class PublicKey:
+    p: int
+    g: int
+    q: int
+    y: int  # 即 pk = g^sk mod p
 
 class ExponentialElGamal:
     def __init__(self, p=None, g=None, q=None):
@@ -37,13 +53,13 @@ class ExponentialElGamal:
                 return g
         raise RuntimeError("Generator not found")
     
-    def keygen(self):
+    def keygen(self) -> Tuple[PublicKey, int]:
         """生成公私钥对"""
         self.sk = number.getRandomRange(1, self.q-1)  # 私钥
         self.pk = mod_exp(self.g, self.sk, self.p)    # 公钥
-        return self.pk, self.sk
+        return PublicKey(self.p, self.g, self.q, self.pk), self.sk
     
-    def encrypt(self, m, pk=None, r=None):
+    def encrypt(self, m: int, pk: int = None, r: int = None) -> ElGamalCiphertext:
         """
         加密消息 m
         m: 明文（整数）
@@ -61,14 +77,14 @@ class ExponentialElGamal:
         g_m = mod_exp(self.g, m, self.p)    # g^m
         beta = (g_m * y_r) % self.p         # g^m * y^r
         
-        return alpha, beta
+        return ElGamalCiphertext(alpha, beta)
     
-    def decrypt(self, ciphertext, sk=None):
+    def decrypt(self, ciphertext: ElGamalCiphertext, sk: int = None) -> int:
         """
         解密密文 (alpha, beta)二元组
         返回 g^m (需额外步骤恢复m)
         """
-        alpha, beta = ciphertext
+        alpha, beta = ciphertext.alpha, ciphertext.beta
         if sk is None:
             sk = self.sk
         
@@ -86,7 +102,7 @@ class ExponentialElGamal:
         g_m = self.decrypt(ciphertext)
         return self.solve_discrete_log(g_m, max_possible)
     
-    def solve_discrete_log(self, g_m, max_value=1000000):
+    def solve_discrete_log(self, g_m, max_value=100):
         """
         通过穷举计算离散对数
         适用于小值域（如投票计票）
