@@ -6,7 +6,7 @@ from typing import Tuple
 from dataclasses import dataclass
 #零知识证明类，用于后面的vote结构体使用
 @dataclass
-class ZKProof:
+class ZKProof_01:
     com1: Tuple[int, int]  # A1, B1
     com2: Tuple[int, int]  # A2, B2
     cha1: int
@@ -49,7 +49,7 @@ class ORProof:
 #V方开始检验：投票者需要向V方发送cha2、cha1、resp1、resp2；V方检验com1和com2的有效性（当m=0的时候，必须有一个通过；m=1的时候，也必须有一个通过），并验证cha1和cha2的关系
     @staticmethod
     def verify_proof(c, com1, com2, cha, cha1, cha2, resp1, resp2, pk_v):
-        zkproof=ZKProof(com1=com1, com2=com2, cha1=cha1, cha2=cha2, resp1=resp1, resp2=resp2)
+        zkproof=ZKProof_01(com1=com1, com2=com2, cha1=cha1, cha2=cha2, resp1=resp1, resp2=resp2)
         alpha, beta = c
         p, _, g, y = pk_v
         A1, B1 = com1
