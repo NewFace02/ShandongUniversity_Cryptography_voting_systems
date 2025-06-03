@@ -65,7 +65,7 @@ class ExponentialElGamal:
     
     def decrypt(self, ciphertext, sk=None):
         """
-        解密密文 (alpha, beta)
+        解密密文 (alpha, beta)二元组
         返回 g^m (需额外步骤恢复m)
         """
         alpha, beta = ciphertext
