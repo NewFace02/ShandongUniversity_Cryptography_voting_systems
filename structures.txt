@@ -39,7 +39,7 @@
 │   ├── crypto/
 │   │   ├── elgamal.py          # ElGamal加密
 │   │   ├── zkp.py              # 零知识证明
-│   │   ├── single_ballot.py     # 证明单个投票有效
+│   │   ├── OR_Proof.py         # 验证投票内容合法性（0，1）
 │   │   └── chaum_pedersen.py   # Chaum-Pedersen证明
 │   ├── models/
 │   │   ├── vote.py             # 投票模型
