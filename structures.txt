@@ -1,4 +1,4 @@
-hello xsj!
+
 /voting-system
 │── /frontend                   # 前端界面（Vue.js）
 │   ├── src/
@@ -39,8 +39,7 @@ hello xsj!
 │   ├── crypto/
 │   │   ├── elgamal.py          # ElGamal加密
 │   │   ├── zkp.py              # 零知识证明
-│   │   ├── single_ballot.py    # 零知识证明单个投票有效
-│   │   └── chaum_pedersen.py   # Chaum-Pedersen证明
+│   │   └── OR_Proof.py         # 验证投票内容合法性
 │   ├── models/
 │   │   ├── vote.py             # 投票模型
 │   │   └── weight_proof.py     # 权重证明模型

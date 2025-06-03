@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 from ..crypto.elgamal import ElGamalCiphertext
-from ..crypto.single_ballot import ZKProof
+from ..crypto.OR_Proof import ZKProof
 
 # 定义了一些结构体
 
