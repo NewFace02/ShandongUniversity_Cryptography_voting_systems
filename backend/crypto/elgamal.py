@@ -2,6 +2,7 @@
 
 from Crypto.Util import number
 from backend.utils.crypto_utils import mod_exp, inverse_mod
+from backend.config import load_elgamal_keys
 from dataclasses import dataclass
 from typing import Tuple
 
@@ -20,43 +21,15 @@ class PublicKey:
     y: int  # 即 pk = g^sk mod p
 
 class ExponentialElGamal:
-    def __init__(self, p=None, g=None, q=None):
-        """
-        初始化加密参数
-        p: 大素数
-        g: 生成元
-        q: 子群阶 (p-1的素因子)
-        """
-        if p and g and q:
-            self.p = p
-            self.g = g
-            self.q = q
-        else:
-            self.generate_parameters(2048)  # 默认2048位安全
-    
-    def generate_parameters(self, bits):
-        """生成安全参数"""
-        self.q = number.getPrime(bits)
-        # 确保p=2q+1也是素数
-        while True:
-            self.p = 2 * self.q + 1
-            if number.isPrime(self.p):
-                break
-        # 寻找生成元
-        self.g = self.find_generator()
-    
-    def find_generator(self):
-        """在循环群中寻找生成元"""
-        for h in range(2, self.p-1):
-            g = mod_exp(h, 2, self.p)
-            if g != 1:
-                return g
-        raise RuntimeError("Generator not found")
+    def __init__(self):
+        """从配置文件加载 ElGamal 公共参数"""
+        self.p, self.g, self.y, self.x = load_elgamal_keys()
+        self.q = (self.p - 1) // 2
+        self.pk = self.y
+        self.sk = self.x
     
     def keygen(self) -> Tuple[PublicKey, int]:
-        """生成公私钥对"""
-        self.sk = number.getRandomRange(1, self.q-1)  # 私钥
-        self.pk = mod_exp(self.g, self.sk, self.p)    # 公钥
+        """返回加载好的公私钥"""
         return PublicKey(self.p, self.g, self.q, self.pk), self.sk
     
     def encrypt(self, m: int, pk: int = None, r: int = None) -> ElGamalCiphertext:
