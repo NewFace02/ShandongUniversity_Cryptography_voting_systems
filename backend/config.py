@@ -37,3 +37,52 @@ def load_elgamal_keys():
             int(data["y"]),
             int(data["x"])
         )
+    
+
+from Crypto.PublicKey import RSA
+RSA_BITS = 2048
+RSA_CACHE_FILE = f"rsa_params_{RSA_BITS}.json"
+
+def generate_and_cache_rsa_keys(bits=2048, save_to_file=False, public_key_file="rsa_public.pem", private_key_file="rsa_private.pem"):
+    """
+    生成 RSA 密钥对
+
+    参数:
+        bits (int): 密钥长度，通常是 2048 bit
+        save_to_file (bool): 是否将密钥保存为文件（默认 False）
+        public_key_file (str): 公钥保存路径（默认 'rsa_public.pem'）
+        private_key_file (str): 私钥保存路径（默认 'rsa_private.pem'）
+
+    返回:
+        (public_key_pem: str, private_key_pem: str)
+    """
+    # 生成密钥对
+    key = RSA.generate(bits,Random.new().read)
+
+    # 导出为 PEM 格式字符串
+    rsa_params = {
+        "n": str(key.n),  # modulus
+        "e": str(key.e),  # public exponent
+        "d": str(key.d)   # private exponent
+    }
+
+    # 可选保存为文件
+    if save_to_file:
+        with open(RSA_CACHE_FILE, "w") as f:
+            json.dump(rsa_params, f)
+        print(f"已生成并缓存 RSA 参数到 {RSA_CACHE_FILE}")
+        return int(rsa_params["n"]), int(rsa_params["e"]), int(rsa_params["d"])
+
+    return int(rsa_params["n"]), int(rsa_params["e"]), int(rsa_params["d"])
+
+def load_rsa_keys():
+    """
+    从缓存加载 RSA 参数（如果不存在则生成）
+    返回：n, e, d
+    """
+    if not os.path.exists(RSA_CACHE_FILE):
+        return generate_and_cache_rsa_keys()
+
+    with open(RSA_CACHE_FILE, "r") as f:
+        data = json.load(f)
+        return int(data["n"]), int(data["e"]), int(data["d"])
