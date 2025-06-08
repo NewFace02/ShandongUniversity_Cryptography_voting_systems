@@ -1,10 +1,10 @@
 #此模块内含使用OR_Proof来证明单次的投票有效果：即使用r来进行加密并且投票落在0或者1
 # backend/crypto/single_ballot.py
 
-from ..utils import crypto_utils
+from backend.utils import crypto_utils
 from typing import Tuple
 from dataclasses import dataclass
-from elgamal import PublicKey
+from backend.crypto.elgamal import PublicKey
 
 
 #零知识证明类，用于后面的vote结构体使用
@@ -33,6 +33,7 @@ class ORProof:
 
         alpha, beta = c
         m2 = (1 - m) % self.p
+
         self.cha2 = crypto_utils.randint(0, self.p)
         self.resp2 = crypto_utils.randint(0, self.p)
 
@@ -48,6 +49,7 @@ class ORProof:
         self.cha1 = (cha - self.cha2) % self.p
         self.resp1 = r * self.cha1 + self.w
         return self.cha1, self.resp1, self.cha2, self.resp2
+    
 
 #V方开始检验：投票者需要向V方发送cha2、cha1、resp1、resp2；V方检验com1和com2的有效性（当m=0的时候，必须有一个通过；m=1的时候，也必须有一个通过），并验证cha1和cha2的关系
     @staticmethod
@@ -59,8 +61,9 @@ class ORProof:
         A2, B2 = com2
 
         if (cha1 + cha2) % p != cha % p:
+            print("cha1+cha2!=cha")
             return False
-
+        
         left_A1 = pow(g, resp1, p)
         right_A1 = A1 * pow(alpha, cha1, p) % p
 
@@ -75,6 +78,7 @@ class ORProof:
 
         # try both paths
         ###当m=0时，beta=beta，com1和com2必须有一个通过检验
+        
         if (left_A1 == right_A1 and left_B1 == right_B1) or (left_A2 == right_A2 and left_B2 == right_B2):
             ###当m=1时，beta=beta/g，com1和com2必须有一个通过检验
             temp = beta * crypto_utils.inverse_mod(g, p) % p

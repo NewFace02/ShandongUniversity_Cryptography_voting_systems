@@ -36,7 +36,7 @@ class ExponentialElGamal:
         """返回加载好的公钥"""
         return self.pk
     
-    def encrypt(self, m: int, pk: int = None, r: int = None) -> ElGamalCiphertext:
+    def encrypt(self, m: int, pk: PublicKey = None, r: int = None) -> Tuple[int, ElGamalCiphertext]:
         """
         加密消息 m
         m: 明文（整数）
@@ -50,12 +50,12 @@ class ExponentialElGamal:
             r = number.getRandomRange(1, self.q-1)
         
         alpha = mod_exp(self.g, r, self.p)  # g^r
-        y_r = mod_exp(pk, r, self.p)        # y^r
+        y_r = mod_exp(self.y, r, self.p)        # y^r
         g_m = mod_exp(self.g, m, self.p)    # g^m
         beta = (g_m * y_r) % self.p         # g^m * y^r
-        
-        return ElGamalCiphertext(alpha, beta)
-    
+
+        return r, ElGamalCiphertext(alpha, beta)
+
     def decrypt(self, ciphertext: ElGamalCiphertext, sk: int = None) -> int:
         """
         解密密文 (alpha, beta)二元组
@@ -70,7 +70,7 @@ class ExponentialElGamal:
         s = mod_exp(alpha, self._sk, self.p)  # s = alpha^sk = g^{r*sk}
         s_inv = inverse_mod(s, self.p)      # s^{-1}
         g_m = (beta * s_inv) % self.p   # g^m = beta * s^{-1}
-        
+    
         return g_m
     
     def decrypt_to_value(self, ciphertext, max_possible=None):
