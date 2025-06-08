@@ -21,16 +21,20 @@ class PublicKey:
     y: int  # 即 pk = g^sk mod p
 
 class ExponentialElGamal:
-    def __init__(self):
+    def __init__(self,decrypt_enabled: bool = False):
         """从配置文件加载 ElGamal 公共参数"""
         self.p, self.g, self.y, self.x = load_elgamal_keys()
         self.q = (self.p - 1) // 2
-        self.pk = self.y
-        self.sk = self.x
+        self.pk = PublicKey(self.p, self.g, self.q, self.y)
+
+        # 安全改进：仅在需要时加载私钥
+        self._sk = self.x if decrypt_enabled else None
+        self.max_log_value = 1000  # 最大支持票数
     
-    def keygen(self) -> Tuple[PublicKey, int]:
-        """返回加载好的公私钥"""
-        return PublicKey(self.p, self.g, self.q, self.pk), self.sk
+    @property
+    def public_key(self) -> PublicKey:
+        """返回加载好的公钥"""
+        return self.pk
     
     def encrypt(self, m: int, pk: int = None, r: int = None) -> ElGamalCiphertext:
         """
@@ -56,12 +60,14 @@ class ExponentialElGamal:
         """
         解密密文 (alpha, beta)二元组
         返回 g^m (需额外步骤恢复m)
+        需要初始化时启用解密功能
         """
+        if self._sk is None:
+            raise PermissionError("解密功能未启用")
+
         alpha, beta = ciphertext.alpha, ciphertext.beta
-        if sk is None:
-            sk = self.sk
         
-        s = mod_exp(alpha, sk, self.p)  # s = alpha^sk = g^{r*sk}
+        s = mod_exp(alpha, self._sk, self.p)  # s = alpha^sk = g^{r*sk}
         s_inv = inverse_mod(s, self.p)      # s^{-1}
         g_m = (beta * s_inv) % self.p   # g^m = beta * s^{-1}
         
