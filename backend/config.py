@@ -43,7 +43,7 @@ from Crypto.PublicKey import RSA
 RSA_BITS = 2048
 RSA_CACHE_FILE = f"rsa_params_{RSA_BITS}.json"
 
-def generate_and_cache_rsa_keys(bits=2048, save_to_file=False, public_key_file="rsa_public.pem", private_key_file="rsa_private.pem"):
+def generate_and_cache_rsa_keys(bits=2048, save_to_file=True):
     """
     生成 RSA 密钥对
 
