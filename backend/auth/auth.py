@@ -66,29 +66,3 @@ def forth_step(n,e,signed_blinded, r, m_i):
 def verify(n,e,serial_number: int, signature: int) -> bool:
     return pow(signature, e, n) == serial_number
 
-
-
-def test_rsa_blind_signature():
-    # 1. 加载 RSA 公钥
-    n, e, _ = load_rsa_keys()
-
-    print("=== [Step 1 & 2] 客户端生成序列号并盲化 ===")
-    blinded_msg, r, m_i = first_step_second_step(n, e)
-    print(f"序列号 m_i: {m_i}")
-    print(f"盲化消息 blinded_msg: {blinded_msg}")
-    print(f"盲化因子 r: {r}\n")
-
-    print("=== [Step 3] 认证机构签名盲化序列号 ===")
-    signed_blinded = third_step(blinded_msg)
-    print(f"盲签名 signed_blinded: {signed_blinded}\n")
-
-    print("=== [Step 4] 客户端脱盲得到资格证书 ===")
-    credential = forth_step(n, e, signed_blinded, r, m_i)
-    print(f"资格证书 credential:\n{credential}\n")
-
-    print("=== [Step 5] 第三方验证签名 ===")
-    is_valid = verify(n, e, credential['serial_number'], credential['signature'])
-    print(f"验证结果: {'✅ 通过' if is_valid else '❌ 无效'}")
-
-if __name__ == "__main__":
-    test_rsa_blind_signature()
