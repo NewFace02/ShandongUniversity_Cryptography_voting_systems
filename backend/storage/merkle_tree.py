@@ -62,6 +62,8 @@ class MerkleTree:
             index = index // 2
         return proof
 
+
+
     @staticmethod
     def verify_proof(leaf: str, proof: List[tuple], root: str) -> bool:
         """
@@ -70,10 +72,22 @@ class MerkleTree:
         :param proof: [(sibling_hash, is_left)]
         :param root: Merkle 根
         """
+        # 如果只有一个叶子节点
+        if root is None:
+            return False
+        
+        if not proof:
+            return sha256(leaf.encode()) == root
+    
         current_hash = sha256(leaf.encode())
+    
+        # 遍历证明路径
         for sibling_hash, is_left in proof:
             if is_left:
+                # 如果兄弟节点在左边
                 current_hash = sha256((sibling_hash + current_hash).encode())
             else:
+                # 如果兄弟节点在右边
                 current_hash = sha256((current_hash + sibling_hash).encode())
+    
         return current_hash == root

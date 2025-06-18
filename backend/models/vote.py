@@ -16,7 +16,6 @@ class Voter:
 class EncryptedAnswer:
     choices: List[ElGamalCiphertext]
     individual_proofs: List[ZKProof_01]
-    overall_proof: ZKProof
 
 @dataclass
 class Vote:
