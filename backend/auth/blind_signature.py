@@ -15,8 +15,7 @@ class BlindSigner:
         return pow(blinded_message, self.d, self.n)
 
 class BlindClient:
-    def __init__(self):
-        n, e, _ = load_rsa_keys()
+    def __init__(self, n: int, e: int):
         self.n = n
         self.e = e
 #注意这里的r不是self.r
