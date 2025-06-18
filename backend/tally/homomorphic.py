@@ -27,7 +27,8 @@ class HomomorphicOperations:
         ciphertext: (alpha, beta)
         scalar: 要加的整数k（权重，目前是整数k是相应股东比别人多的票数）
         """
-        alpha, beta = ciphertext
+        alpha = ciphertext.alpha
+        beta = ciphertext.beta
         g_k = mod_exp(self.params.g, scalar, self.p)
         new_beta = new_beta = (ciphertext.beta * g_k) % self.p
         return ElGamalCiphertext(ciphertext.alpha, new_beta)

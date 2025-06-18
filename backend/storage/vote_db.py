@@ -76,6 +76,14 @@ def store_vote(ciphertext: Dict, zkp: Dict, weight_signature: str) -> Dict:
         raise ValueError("Invalid ciphertext format")
 
     try:
+        # 验证密文格式并转换为整数
+        alpha = int(ciphertext["alpha"])
+        beta = int(ciphertext["beta"])
+    except (KeyError, ValueError):
+        raise ValueError("Invalid ciphertext format or values")
+
+
+    try:
         # 使用模型结构构建投票记录
         encrypted_answer = EncryptedAnswer(
             choices=[ElGamalCiphertext(
@@ -134,7 +142,7 @@ def store_vote(ciphertext: Dict, zkp: Dict, weight_signature: str) -> Dict:
                     
                     # 获取当前投票的Merkle证明
                     proof = merkle_tree.get_proof(vote_index)
-
+                                      
                     # 先写入数据确保一致性
                     f.seek(0)
                     json.dump(data, f, indent=2)
