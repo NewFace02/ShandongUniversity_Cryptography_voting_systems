@@ -2,7 +2,6 @@ from typing import Dict, List, Tuple
 from ..crypto.elgamal import ExponentialElGamal, ElGamalCiphertext
 from ..storage.vote_db import get_all_votes
 from .homomorphic import HomomorphicOperations
-from ..audit.logger import AuditLogger
 from ..models.vote import Vote
 import json
 import random
@@ -138,14 +137,3 @@ class TallyController:
             "beta": str(final_tally.beta),
             "result": str(result)
         }
-
-    def _audit_tally_result(self, result: int, total_weight: int, proof: Dict):
-        """记录计票结果到审计日志"""
-        audit_data = {
-            "timestamp": "...",
-            "result": result,
-            "total_weight": total_weight,
-            "proof": proof
-        }
-        # TODO: 调用审计日志记录
-        # AuditLogger.log_tally_result(audit_data)

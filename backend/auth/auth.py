@@ -24,45 +24,123 @@
 5. **投票验证**  
    - 计票机构验证资格证：  
      1. 检查序列号 `m_i` 是否首次使用（防重复投票）。  
-     2. 用认证机构公钥验证签名有效性（椭圆曲线验证算法）。  
+     2. 用认证机构公钥验证签名有效性 
    - **双重保障**：唯一序列号防重投，数字签名防伪造。"""
-from .blind_signature import BlindClient, BlindSigner
+from typing import Dict, Set, Tuple
+import json
+import os
 import random
 from ..config import load_rsa_keys
-#第一步和第二步，客户生成盲化的序列号
-def first_step_second_step(n,e):
+from .blind_signature import BlindClient, BlindSigner
+
+class CredentialVerifier:
+    """投票资格验证器"""
     
-    m_i = random.getrandbits(256) # 此 m_i 直接作为消息 M
+    def __init__(self):
+        """初始化验证器"""
+        self.used_serials: Set[int] = set()  # 已使用的序列号集合
+        self.n, self.e, _ = load_rsa_keys()  # 只需要公钥(n,e)
+        self._load_used_serials()  # 从文件加载已使用序列号
+        self.signer = BlindSigner()  # 初始化签名者
+    
+    def _load_used_serials(self):
+        """从文件加载已使用的序列号"""
+        try:
+            # 存储在auth目录下的used_serials.json
+            path = os.path.join(os.path.dirname(__file__), "used_serials.json")
+            if os.path.exists(path):
+                with open(path, "r") as f:
+                    data = json.load(f)
+                    self.used_serials = set(map(int, data["used_serials"]))
+            else:
+                self.used_serials = set()
+        except Exception as e:
+            print(f"加载已用序列号失败: {e}")
+            self.used_serials = set()   
+    def _save_used_serials(self):
+        """保存已使用的序列号到文件"""
+        try:
+            path = os.path.join(os.path.dirname(__file__), "used_serials.json")
+            with open(path, "w") as f:
+                json.dump({
+                    "used_serials": list(map(str, self.used_serials))
+                }, f, indent=2)
+        except Exception as e:
+            print(f"保存已用序列号失败: {e}")
+            
+    def generate_credential(self) -> Dict:
+        """
+        生成投票资格证书（包含所有步骤）
+        返回: 完整的资格证书
+        """
+        # 步骤1&2: 生成盲化序列号
+        blinded_msg, r, m_i = self.generate_blinded_serial()
+        
+        # 步骤3: 签名机构签名
+        signed_blinded = self.sign_blinded_message(blinded_msg)
+        
+        # 步骤4: 生成最终凭证
+        return self.create_credential(signed_blinded, r, m_i)
 
+    def generate_blinded_serial(self) -> Tuple[int, int, int]:
+        """
+        生成盲化的序列号（步骤1&2）
+        返回: (blinded_msg, r, m_i)
+        """
+        m_i = random.getrandbits(256)  # 生成随机序列号
+        client = BlindClient(self.n, self.e)
+        blinded_msg, r = client.blind(m_i)
+        return blinded_msg, r, m_i
 
+    def sign_blinded_message(self, blinded_msg: int) -> int:
+        """
+        对盲化消息进行签名（步骤3）
+        """
+        return self.signer.sign(blinded_msg)
 
-    client = BlindClient(n, e)
+    def create_credential(self, signed_blinded: int, r: int, m_i: int) -> Dict:
+        """
+        创建最终凭证（步骤4）
+        """
+        client = BlindClient(self.n, self.e)
+        signature = client.unblind(signed_blinded, r)
+        
+        return {
+            'serial_number': m_i,
+            'signature': signature
+        }
 
-    blinded_msg, r = client.blind(m_i)
-    return blinded_msg, r, m_i
-# 发送 blinded_msg 给认证机构
+    def verify_credential(self, credential: Dict) -> bool:
+        """验证投票资格证明（步骤5）"""
+        try:
+            serial_number = credential["serial_number"]
+            signature = credential["signature"]
+            
+            # 1. 检查序列号是否已被使用
+            if serial_number in self.used_serials:
+                print(f"序列号 {serial_number} 已被使用")
+                return False
+                
+            # 2. 验证签名
+            if not self._verify_signature(serial_number, signature):
+                print(f"签名验证失败")
+                return False
+                
+            # 3. 验证通过，记录已使用
+            self.used_serials.add(serial_number)
+            self._save_used_serials()
+            
+            return True
+            
+        except Exception as e:
+            print(f"验证过程发生错误: {e}")
+            return False
 
-def third_step(blinded_msg):
-    signer = BlindSigner()
-
-    signed_blinded = signer.sign(blinded_msg)
-    return signed_blinded
-# 返回 signed_blinded 给选民
-def forth_step(n,e,signed_blinded, r, m_i):
-    client = BlindClient(n,e)
-    # 选民脱盲
-    # 注意这里的 r 是在第一步生成的随机数
-    # m_i 是原始的随机序列号
-    # signed_blinded 是认证机构签名后的盲化序列号
-    signature = client.unblind(signed_blinded, r)
-
-    credential = {
-        'serial_number': m_i,   # 原始随机序列号
-        'signature': signature  # 对 m_i 的 RSA 签名
-    }
-
-    return credential
-#此函数仅用于验证签名
-def verify(n,e,serial_number: int, signature: int) -> bool:
-    return pow(signature, e, n) == serial_number
-
+    def _verify_signature(self, serial_number: int, signature: int) -> bool:
+        """验证RSA签名"""
+        return pow(signature, self.e, self.n) == serial_number
+    
+    def clear_used_serials(self):
+        """清空已使用序列号(仅用于测试)"""
+        self.used_serials.clear()
+        self._save_used_serials()
