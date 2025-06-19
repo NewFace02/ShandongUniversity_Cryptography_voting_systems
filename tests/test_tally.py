@@ -1,5 +1,5 @@
 import pytest
-from backend.vote.controller import TallyController
+from backend.tally.controller import TallyController
 from backend.storage.vote_db import store_vote, clear_votes
 from backend.crypto.elgamal import ElGamalCiphertext
 import json
