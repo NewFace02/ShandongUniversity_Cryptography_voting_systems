@@ -137,3 +137,29 @@ class TallyController:
             "beta": str(final_tally.beta),
             "result": str(result)
         }
+
+
+class CredentialVerifier:
+    def sign_weight(self, voter_id: str, weight: int) -> str:
+        """生成权重签名"""
+        message = f"{voter_id}:{weight}"
+        signature = self.signer.sign(int.from_bytes(message.encode(), 'big'))
+        return f"weight_{weight}_{signature}"
+    
+    def verify_weight_signature(self, weight_signature: str, voter_id: str) -> bool:
+        """验证权重签名"""
+        try:
+            parts = weight_signature.split('_')
+            if len(parts) != 3 or parts[0] != 'weight':
+                return False
+                
+            weight = int(parts[1])
+            signature = int(parts[2])
+            
+            message = f"{voter_id}:{weight}"
+            expected = pow(signature, self.e, self.n)
+            actual = int.from_bytes(message.encode(), 'big')
+            
+            return expected == actual
+        except:
+            return False

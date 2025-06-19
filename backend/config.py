@@ -86,3 +86,17 @@ def load_rsa_keys():
     with open(RSA_CACHE_FILE, "r") as f:
         data = json.load(f)
         return int(data["n"]), int(data["e"]), int(data["d"])
+
+
+# 基础路径配置
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
+# 确保数据目录存在
+os.makedirs(DATA_DIR, exist_ok=True)
+
+# 文件路径配置
+SHAREHOLDERS_FILE = os.environ.get(
+    "SHAREHOLDERS_FILE",
+    os.path.join(DATA_DIR, "shareholders.json")
+)

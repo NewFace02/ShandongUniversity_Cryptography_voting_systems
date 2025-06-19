@@ -4,6 +4,7 @@ from ..storage.merkle_tree import MerkleTree
 from ..crypto.OR_Proof import ORProof
 import json
 from ..crypto.elgamal import ExponentialElGamal, PublicKey
+from ..auth.auth import CredentialVerifier 
 
 class VerifyController:
     def __init__(self):
@@ -11,6 +12,7 @@ class VerifyController:
         # 初始化 ElGamal 实例以获取公钥
         self.elgamal = ExponentialElGamal(decrypt_enabled=False)
         self.pk = self.elgamal.public_key  # 获取公钥对象
+        self.credential_verifier = CredentialVerifier() 
     def verify_vote(self, vote_index: int) -> Dict:
         """验证投票的存在性和完整性"""
         try:

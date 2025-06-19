@@ -1,0 +1,25 @@
+{
+  "shareholders": {
+    "shareholder_001": {
+      "name": "张三",
+      "uuid": "550e8400-e29b-41d4-a716-446655440000",
+      "voter_id": "shareholder_001",
+      "voter_type": "shareholder",
+      "weight": 5
+    },
+    "shareholder_002": {
+      "name": "李四",
+      "uuid": "550e8400-e29b-41d4-a716-446655440001",
+      "voter_id": "shareholder_002",
+      "voter_type": "shareholder",
+      "weight": 3
+    },
+    "shareholder_003": {
+      "name": "王五",
+      "uuid": "550e8400-e29b-41d4-a716-446655440002",
+      "voter_id": "shareholder_003",
+      "voter_type": "shareholder",
+      "weight": 2
+    }
+  }
+}
